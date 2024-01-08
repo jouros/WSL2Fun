@@ -109,10 +109,10 @@ Default kernel configs:
 ```text
 ls -la Microsoft/
 total 8
-drwxr-xr-x  2 joro joro 4096 Oct  7 02:23 .
-drwxr-xr-x 27 joro joro 4096 Oct  7 02:23 ..
-lrwxrwxrwx  1 joro joro   30 Oct  7 02:23 config-wsl -> ../arch/x86/configs/config-wsl
-lrwxrwxrwx  1 joro joro   38 Oct  7 02:23 config-wsl-arm64 -> ../arch/arm64/configs/config-wsl-arm64
+drwxr-xr-x  2 foofoo foofoo 4096 Oct  7 02:23 .
+drwxr-xr-x 27 foofoo foofoo 4096 Oct  7 02:23 ..
+lrwxrwxrwx  1 foofoo foofoo   30 Oct  7 02:23 config-wsl -> ../arch/x86/configs/config-wsl
+lrwxrwxrwx  1 foofoo foofoo   38 Oct  7 02:23 config-wsl-arm64 -> ../arch/arm64/configs/config-wsl-arm64
 ```
 
 /kernel/WSL2-Linux-Kernel-linux-msft-wsl-5.15.133.1$ cp Microsoft/config-wsl ./.config
@@ -175,7 +175,7 @@ ls /lib/modules/$(uname -r)/kernel/arch/x86/kvm/
 kvm-intel.ko
 
 $ ls -la arch/x86_64/boot/bzImage
-lrwxrwxrwx 1 joro joro 22 Dec  4 12:39 arch/x86_64/boot/bzImage -> ../../x86/boot/bzImage
+lrwxrwxrwx 1 foofoo foofoo 22 Dec  4 12:39 arch/x86_64/boot/bzImage -> ../../x86/boot/bzImage
 
 ~/kernel/WSL2-Linux-Kernel-linux-msft-wsl-5.15.133.1$ cp arch/x86/boot/bzImage /mnt/c/Users/XXX/bzImage
 
@@ -487,7 +487,7 @@ k8s-admin@kube2:~$ sudo kubeadm join kube1:6443 --token ztrn06.m
 
 ```text
 $ ssh k8s-admin@192.168.122.10 kubectl get nodes -o wide
-Enter passphrase for key '/home/joro/.ssh/id_rsa':
+Enter passphrase for key '/home/foofoo/.ssh/id_rsa':
 NAME    STATUS   ROLES           AGE     VERSION   INTERNAL-IP      EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
 kube1   Ready    control-plane   72m     v1.28.2   192.168.122.10   <none>        Ubuntu 22.04.3 LTS   5.15.0-91-generic   containerd://1.6.26
 kube2   Ready    <none>          15m     v1.28.2   192.168.122.11   <none>        Ubuntu 22.04.3 LTS   5.15.0-91-generic   containerd://1.6.26

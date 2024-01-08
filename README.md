@@ -91,9 +91,11 @@ After this operation, 67.6 kB of additional disk space will be used.
 Do you want to continue? [Y/n] Y
 ```
 
-\# kvm-ok
+```text
+# kvm-ok
 INFO: /dev/kvm exists
 KVM acceleration can be used
+```
 
 $ sudo apt  install aria2 make build-essential libncurses-dev bison flex libssl-dev libelf-dev bc dwarves
 
@@ -101,9 +103,14 @@ $ sudo apt  install aria2 make build-essential libncurses-dev bison flex libssl-
 ## Customize Linux Kernel
 
 Download latest kernel:
-$ aria2c https://github.com/microsoft/WSL2-Linux-Kernel/archive/refs/tags/linux-msft-wsl-5.15.133.1.tar.gz
 
+```text
+$ aria2c https://github.com/microsoft/WSL2-Linux-Kernel/archive/refs/tags/linux-msft-wsl-5.15.133.1.tar.gz
+```
+
+```text
 $ tar xvfz WSL2-Linux-Kernel-linux-msft-wsl-5.15.133.1.tar.gz
+```
 
 Default kernel configs:
 ```text
@@ -115,7 +122,9 @@ lrwxrwxrwx  1 foofoo foofoo   30 Oct  7 02:23 config-wsl -> ../arch/x86/configs/
 lrwxrwxrwx  1 foofoo foofoo   38 Oct  7 02:23 config-wsl-arm64 -> ../arch/arm64/configs/config-wsl-arm64
 ```
 
+```text
 /kernel/WSL2-Linux-Kernel-linux-msft-wsl-5.15.133.1$ cp Microsoft/config-wsl ./.config
+```
 
 Customize kernel config:
 
@@ -153,31 +162,44 @@ CONFIG_KVM_AMD=y
 CONFIG_PTP_1588_CLOCK_KVM=y
 ```
 
+```text
 $ make -j 8
-...
+... a lot of output here
 Kernel: arch/x86/boot/bzImage is ready  (#2)
+```
 
+```text
 $ sudo make modules_install
 arch/x86/Makefile:142: CONFIG_X86_X32 enabled but no binutils support
   INSTALL /lib/modules/5.15.133.1-microsoft-standard-WSL2/kernel/arch/x86/kvm/kvm-intel.ko
   DEPMOD  /lib/modules/5.15.133.1-microsoft-standard-WSL2
+```
 
 ~/kernel/WSL2-Linux-Kernel-linux-msft-wsl-5.15.133.1$ grep 'CONFIG_X86_X32' .config
 CONFIG_X86_X32=y <= TURN OFF NEXT TIME !!!
 
 Creates /lib/modules/KERNEL_VERSION:
+
+```text
 $ ls /lib/modules/$(uname -r)
 build          modules.alias.bin          modules.builtin.bin      modules.dep.bin  modules.softdep      source
 kernel         modules.builtin            modules.builtin.modinfo  modules.devname  modules.symbols
 modules.alias  modules.builtin.alias.bin  modules.dep              modules.order    modules.symbols.bin
+```
 
+```text
 ls /lib/modules/$(uname -r)/kernel/arch/x86/kvm/
 kvm-intel.ko
+```
 
+```text
 $ ls -la arch/x86_64/boot/bzImage
 lrwxrwxrwx 1 foofoo foofoo 22 Dec  4 12:39 arch/x86_64/boot/bzImage -> ../../x86/boot/bzImage
+```
 
+```text
 ~/kernel/WSL2-Linux-Kernel-linux-msft-wsl-5.15.133.1$ cp arch/x86/boot/bzImage /mnt/c/Users/XXX/bzImage
+```
 
 EDIT .wslconfig (already included in above .wslconfig example)
 kernel=C:\\Users\\[WINUSER]\\bzImage
@@ -193,68 +215,94 @@ options kvm-intel ept=1
 ```
 
 Reload wsl:
+
+```text
 C:\Users\XXX>wsl -l -v
   NAME                   STATE           VERSION
 * docker-desktop-data    Stopped         2
   Ubuntu                 Stopped         2
   docker-desktop         Stopped         2
+```
 
 C:\Users\rXXX>wsl --shutdown Ubuntu
 
 C:\Users\rXXX>wsl -d Ubuntu
 
 Module check:
-\# lsmod
+
+```text
+# lsmod
 Module                  Size  Used by
 kvm_intel             327680  0
+```
 
-\# kvm-ok
+```text
+# kvm-ok
 INFO: /dev/kvm exists
 KVM acceleration can be used
+```
 
+```text
 \# cat /sys/module/kvm_intel/parameters/nested
 Y
-
+```
 
 ## Install KVM
 
+```text
 $ sudo apt -y install  qemu-kvm virt-manager libvirt-daemon-system virtinst libvirt-clients bridge-utils
+```
 
+```text
 $ sudo systemctl status libvirtd
  libvirtd.service - Virtualization daemon
      Loaded: loaded (/lib/systemd/system/libvirtd.service; enabled; vendor preset: enabled)
      Active: active (running) since Mon 2023-12-04 13:49:03 EET; 2min 55s ago
+```
 
+```text
 $ sudo usermod -aG libvirt $USER
 $ exit
 logout
+```
 
 C:\Users\rXXX>wsl -d Ubuntu
-
 
 Note! X for wsl2: wsl2 has now native support for GUI apps
 
 
 Deploy Ubuntu nested KVM VM host:
+
+```text
 $ aria2c https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img
 $ aria2c https://cloud-images.ubuntu.com/jammy/current/MD5SUMS
-
 $ md5sum -c MD5SUMS-Ubuntu
 jammy-server-cloudimg-amd64.img: OK
-
 $ apt install cloud-init libguestfs-tools cloud-image-utils
-
 $ cloud-init -v
 /usr/bin/cloud-init 23.3.3-0ubuntu0~22.04.1
+```
 
+Check schema:
+
+```text
 $ sudo python3 -m cloudinit.cmd.main schema -c ./user-data  ==  sudo cloud-init schema -c user-data
 Valid cloud-config: ./user-data
+```
 
+Create seed ISO:
+
+```text
 $ cloud-localds seed1.iso ./jammy-seeds/user-data ./jammy-seeds/meta-data
+```
 
+Check os altgernatives:
+
+```text
 $ virt-install --os-variant list
+```
 
-Selfmade seed:
+Virt install with Selfmade seed ISO:
 
 ```text
 virt-install \
@@ -279,35 +327,48 @@ virt-install \
         --import
 ```
 
+```text
 $ virsh list --all
  Id   Name     State
 -------------------------
  -    Jammy1   shut off
+```
 
-Change default 'root' to enable virsh start: 
-/etc/libvirt/qemu.conf
+
+Change default 'root' to enable virsh start in /etc/libvirt/qemu.conf
+
+```text
 user = "XXX"
 group = "libvirt"
+```
 
-\# systemctl restart libvirtd
+Restart Libvirt:
 
-\# Set default DHCP range
+```text
+# systemctl restart libvirtd
+```
+
+Set default DHCP range for KVM:
+
+```text
 $ virsh net-edit default
  <range start='192.168.122.100' end='192.168.122.254'/>
 
 $ virsh net-destroy default
 Network default destroyed
+```
 
 ```text
 $ virsh net-list --all
  Name      State      Autostart   Persistent
 ----------------------------------------------
  default   inactive   yes         yes
+````
 
 ```text
-
 $ virsh net-start default
 Network default started
+```
 
 ```text
 $ virsh net-list --all
@@ -342,10 +403,12 @@ virt-install \
 
 ## Deploy docker repo key
 
-wget https://download.docker.com/linux/ubuntu/gpg -O docker.gpg.pub.key
+```text
+$ wget https://download.docker.com/linux/ubuntu/gpg -O docker.gpg.pub.key
 gpg --list-packets docker.gpg.pub.key | awk '/keyid:/{ print $2 }'
 8D81803C0EBFCD88
 7EA0A9C3F273FCD8
+```
 
 Disable /etc/hosts auto generation because there was syntax error in that file:
 
@@ -361,9 +424,12 @@ generateHosts = false
 
 ## Deploy K8s with Calico CNI
 
+```text
 kubeadm init --v=5 --ignore-preflight-errors=NumCPU,Mem --node-name=kube1 --pod-network-cidr=10.244.0.0/16 --upload-certs --control-plane-endpoint=kube1 --kubernetes-version=v1.28.2
+```
 
 Set K8s basics:
+
 ```text
 $ mkdir -p /home/k8s-admin/.kube
 $ chown  k8s-admin:k8s-admin /home/k8s-admin/.kube
@@ -402,7 +468,9 @@ clusterrolebinding.rbac.authorization.k8s.io/tigera-operator created
 deployment.apps/tigera-operator created
 ```
 
+```text
 k8s-admin@kube1:~$ curl https://raw.githubusercontent.com/projectcalico/calico/v3.26.4/manifests/custom-resources.yaml -O
+```
 
 ```text
 $ cat custom-resources.yaml => set ip range
@@ -434,9 +502,11 @@ metadata:
 spec: {}
 ```
 
+```text
 k8s-admin@kube1:~$ kubectl create -f custom-resources.yaml
 installation.operator.tigera.io/default created
 apiserver.operator.tigera.io/default created
+```
 
 ```text
 k8s-admin@kube1:~$ kubectl get nodes -o wide
@@ -475,17 +545,23 @@ $ cat /etc/hosts
 192.168.122.13 kube4.local kube4
 ```
 
+```text
 $ prepare-cloudimage-disk.sh -n jammy-server-cloudimg-amd64 -N 2
+```
 
+```text
 $ ./vm-script-ubuntu-cloudinit.sh -n Kube2 -d 'Worker 1' -p './jammy-server-cloudimg-amd64-50G-2.qcow2' -N '2'
-
+```
 
 ### Create and deploy K8s join token
 
+```text
 k8s-admin@kube1:~$ sudo kubeadm token create --print-join-command
+```
 
+```text
 k8s-admin@kube2:~$ sudo kubeadm join kube1:6443 --token ztrn06.m
-
+```
 
 ### Final check
 
@@ -498,4 +574,3 @@ kube2   Ready    <none>          15m     v1.28.2   192.168.122.11   <none>      
 kube3   Ready    <none>          6m37s   v1.28.2   192.168.122.12   <none>        Ubuntu 22.04.3 LTS   5.15.0-91-generic   containerd://1.6.26
 kube4   Ready    <none>          23s     v1.28.2   192.168.122.13   <none>        Ubuntu 22.04.3 LTS   5.15.0-91-generic   containerd://1.6.26
 ```
-

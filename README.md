@@ -350,7 +350,7 @@ gpg --list-packets docker.gpg.pub.key | awk '/keyid:/{ print $2 }'
 Disable /etc/hosts auto generation because there was syntax error in that file:
 
 ```text
-\# cat /etc/wsl.conf
+# cat /etc/wsl.conf
 
 [boot]
 systemd=true
@@ -363,10 +363,13 @@ generateHosts = false
 
 kubeadm init --v=5 --ignore-preflight-errors=NumCPU,Mem --node-name=kube1 --pod-network-cidr=10.244.0.0/16 --upload-certs --control-plane-endpoint=kube1 --kubernetes-version=v1.28.2
 
+Set K8s basics:
+```text
 $ mkdir -p /home/k8s-admin/.kube
 $ chown  k8s-admin:k8s-admin /home/k8s-admin/.kube
 $ sudo cp -i /etc/kubernetes/admin.conf /home/k8s-admin/.kube/config
 $ sudo chown k8s-admin:k8s-admin /home/k8s-admin/.kube/config
+```
 
 ```text
 $ kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.4/manifests/tigera-operator.yaml
@@ -473,6 +476,7 @@ $ cat /etc/hosts
 ```
 
 $ prepare-cloudimage-disk.sh -n jammy-server-cloudimg-amd64 -N 2
+
 $ ./vm-script-ubuntu-cloudinit.sh -n Kube2 -d 'Worker 1' -p './jammy-server-cloudimg-amd64-50G-2.qcow2' -N '2'
 
 

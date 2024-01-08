@@ -549,6 +549,8 @@ $ cat /etc/hosts
 $ prepare-cloudimage-disk.sh -n jammy-server-cloudimg-amd64 -N 2
 ```
 
+Create worker nodes one by one:
+
 ```text
 $ ./vm-script-ubuntu-cloudinit.sh -n Kube2 -d 'Worker 1' -p './jammy-server-cloudimg-amd64-50G-2.qcow2' -N '2'
 ```

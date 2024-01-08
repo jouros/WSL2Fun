@@ -401,7 +401,7 @@ virt-install \
         --import
 ```
 
-## Deploy docker repo key
+## Deploy Docker repo key
 
 ```text
 $ wget https://download.docker.com/linux/ubuntu/gpg -O docker.gpg.pub.key

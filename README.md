@@ -118,10 +118,13 @@ lrwxrwxrwx  1 joro joro   38 Oct  7 02:23 config-wsl-arm64 -> ../arch/arm64/conf
 /kernel/WSL2-Linux-Kernel-linux-msft-wsl-5.15.133.1$ cp Microsoft/config-wsl ./.config
 
 Customize kernel config:
+
+```text
 $ make menuconfig
 Virtualization => KVM for Intel processors support => 'M'
 Processor type and features => Linux guest support => '*' KVM Guest support
 Generic IOMMU Pagetable Support
+```
 
 ```text
 $ grep 'KVM' .config

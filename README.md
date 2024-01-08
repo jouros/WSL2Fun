@@ -199,9 +199,9 @@ C:\Users\XXX>wsl -l -v
   Ubuntu                 Stopped         2
   docker-desktop         Stopped         2
 
-C:\Users\rosen>wsl --shutdown Ubuntu
+C:\Users\rXXX>wsl --shutdown Ubuntu
 
-C:\Users\rosen>wsl -d Ubuntu
+C:\Users\rXXX>wsl -d Ubuntu
 
 Module check:
 \# lsmod
@@ -229,7 +229,7 @@ $ sudo usermod -aG libvirt $USER
 $ exit
 logout
 
-C:\Users\rosen>wsl -d Ubuntu
+C:\Users\rXXX>wsl -d Ubuntu
 
 
 Note! X for wsl2: wsl2 has now native support for GUI apps

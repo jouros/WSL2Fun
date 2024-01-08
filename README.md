@@ -123,6 +123,7 @@ Virtualization => KVM for Intel processors support => 'M'
 Processor type and features => Linux guest support => '*' KVM Guest support
 Generic IOMMU Pagetable Support
 
+```text
 $ grep 'KVM' .config
 CONFIG_KVM_GUEST=y
 CONFIG_HAVE_KVM=y
@@ -147,6 +148,7 @@ CONFIG_KVM_AMD=y
 \# CONFIG_KVM_XEN is not set
 \# CONFIG_KVM_MMU_AUDIT is not set
 CONFIG_PTP_1588_CLOCK_KVM=y
+```
 
 $ make -j 8
 ...

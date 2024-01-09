@@ -377,17 +377,17 @@ $ virsh net-list --all
  default   active   yes         yes
 ```
 
-Virt install with Yaml seeds:
+Virt install with Yaml seeds, every node has its own cloudinit config folder, below is first worker node 'kube2' deployment:
 
 ```text
 virt-install \
         --virt-type kvm \
         --connect qemu:///system \
-        --name "Kube1" \
+        --name "Kube2" \
         --description "Kube" \
         --ram 4096 \
         --vcpus 2 \
-        --disk path="~/bakery/jammy-server-cloudimg-amd64-50G-1.qcow2",device=disk,bus=virtio \
+        --disk path="~/bakery/jammy-server-cloudimg-amd64-50G-2.qcow2",device=disk,bus=virtio \
         --cloud-init user-data="./Ubuntu-cloudinit/jammy-seeds2/user-data.yaml",meta-data="./Ubuntu-cloudinit/jammy-seeds2/meta-data.yaml",network-config="./Ubuntu-cloudinit/jammy-seeds2/network-config.yaml" \
         --os-type linux \
         --os-variant ubuntu22.04 \
@@ -563,6 +563,19 @@ Create worker nodes one by one:
 $ ./vm-script-ubuntu-cloudinit.sh -n Kube2 -d 'Worker 1' -p './jammy-server-cloudimg-amd64-50G-2.qcow2' -N '2'
 ```
 
+Every VM has its own qcow2 disk image:
+
+```text
+$ virsh dumpxml Kube1 | grep 'source file'
+      <source file='/home/XXX/bakery/jammy-server-cloudimg-amd64-50G-1.qcow2' index='2'/>
+$ virsh dumpxml Kube2 | grep 'source file'
+      <source file='/home/XXX/bakery/jammy-server-cloudimg-amd64-50G-2.qcow2' index='2'/>
+$ virsh dumpxml Kube3 | grep 'source file'
+      <source file='/home/XXX/bakery/jammy-server-cloudimg-amd64-50G-3.qcow2' index='2'/>
+$ virsh dumpxml Kube4 | grep 'source file'
+      <source file='/home/XXX/bakery/jammy-server-cloudimg-amd64-50G-4.qcow2' index='2'/>
+```
+
 ### Create and deploy K8s join token
 
 Create token:
@@ -600,8 +613,8 @@ I just like to use Ansible for all kind of management tasks.
 # exit
 $ ansible --version
 ansible 2.10.8
-  config file = /home/joro/WSL2Fun/ansible.cfg
-  configured module search path = ['/home/joro/.ansible/plugins/modules', '/usr/share/ansible/plugins/modules']
+  config file = /home/XXX/WSL2Fun/ansible.cfg
+  configured module search path = ['/home/XXX/.ansible/plugins/modules', '/usr/share/ansible/plugins/modules']
   ansible python module location = /usr/lib/python3/dist-packages/ansible
   executable location = /usr/bin/ansible
   python version = 3.10.12 (main, Nov 20 2023, 15:14:05) [GCC 11.4.0]

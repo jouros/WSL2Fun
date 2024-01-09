@@ -1,0 +1,15 @@
+---
+- name: Connection test
+  hosts: all 
+  gather_facts: no
+  become: yes 
+  tasks:
+  - name: Check host
+    shell: |
+      uptime; uname -a; hostname; id; grep 'VERSION=' /etc/os-release 
+    register: response
+       
+  - name: Show response
+    debug: 
+      msg: "{{ response.stdout }}"
+...

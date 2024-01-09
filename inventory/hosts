@@ -1,0 +1,13 @@
+[control-plane]
+kube1 ansible_host=192.168.122.10 ansible_port=22 ansible_ssh_private_key_file=~/.ssh/id_rsa
+
+[worker]
+kube2 ansible_host=192.168.122.11 ansible_port=22 ansible_ssh_private_key_file=~/.ssh/id_rsa
+kube3 ansible_host=192.168.122.12 ansible_port=22 ansible_ssh_private_key_file=~/.ssh/id_rsa
+kube4 ansible_host=192.168.122.13 ansible_port=22 ansible_ssh_private_key_file=~/.ssh/id_rsa
+
+[kube]
+kube1 ansible_host=192.168.122.10 ansible_port=22 ansible_ssh_private_key_file=~/.ssh/id_rsa
+kube2 ansible_host=192.168.122.11 ansible_port=22 ansible_ssh_private_key_file=~/.ssh/id_rsa
+kube3 ansible_host=192.168.122.12 ansible_port=22 ansible_ssh_private_key_file=~/.ssh/id_rsa
+kube4 ansible_host=192.168.122.13 ansible_port=22 ansible_ssh_private_key_file=~/.ssh/id_rsa

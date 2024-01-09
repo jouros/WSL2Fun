@@ -1,0 +1,9 @@
+---
+- name: Linux host setup
+  hosts: all 
+  gather_facts: no
+  vars:
+    OS_VERSION: ubuntu
+  roles:
+    - { role: setup, tags: ['setup'] }
+...

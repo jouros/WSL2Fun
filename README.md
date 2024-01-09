@@ -508,11 +508,15 @@ installation.operator.tigera.io/default created
 apiserver.operator.tigera.io/default created
 ```
 
+Control-plane is now ready:
+
 ```text
 k8s-admin@kube1:~$ kubectl get nodes -o wide
 NAME    STATUS   ROLES           AGE   VERSION   INTERNAL-IP      EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
 kube1   Ready    control-plane   20m   v1.28.2   192.168.122.10   <none>        Ubuntu 22.04.3 LTS   5.15.0-91-generic   containerd://1.6.26
 ```
+
+Calico CNI is ready:
 
 ```text
 k8s-admin@kube1:~$ kubectl get pods --all-namespaces
@@ -533,7 +537,9 @@ kube-system        kube-scheduler-kube1                      1/1     Running   0
 tigera-operator    tigera-operator-7f8cd97876-gdwwj          1/1     Running   0          3m17s
 ```
 
-### Prep step for every node
+### Prep steps for every node
+
+Set /etc/hosts for every node:
 
 ```text
 $ cat /etc/hosts
@@ -544,6 +550,8 @@ $ cat /etc/hosts
 192.168.122.12 kube3.local kube3
 192.168.122.13 kube4.local kube4
 ```
+
+Prepare VM images for deployments one by one:
 
 ```text
 $ prepare-cloudimage-disk.sh -n jammy-server-cloudimg-amd64 -N 2
@@ -557,15 +565,21 @@ $ ./vm-script-ubuntu-cloudinit.sh -n Kube2 -d 'Worker 1' -p './jammy-server-clou
 
 ### Create and deploy K8s join token
 
+Create token:
+
 ```text
 k8s-admin@kube1:~$ sudo kubeadm token create --print-join-command
 ```
+
+Join worker node:
 
 ```text
 k8s-admin@kube2:~$ sudo kubeadm join kube1:6443 --token ztrn06.m
 ```
 
 ### Final check
+
+K8s is now up'n'running :)
 
 ```text
 $ ssh k8s-admin@192.168.122.10 kubectl get nodes -o wide
@@ -578,6 +592,8 @@ kube4   Ready    <none>          23s     v1.28.2   192.168.122.13   <none>      
 ```
 
 ## Install Ansible
+
+I just like to use Ansible for all kind of management tasks. 
 
 ```text
 # apt install ansible
@@ -763,7 +779,8 @@ setup : Reboot the Debian or Ubuntu server -------------------------------------
 
 ### Deploy Helm to Kube with Ansible
 
-1
+Helm is defacto package manager for K8s and I prefer to use it everywhere. 
+
 
 ### Deploy nginx Pod to Kube with Ansible
 

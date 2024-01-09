@@ -576,3 +576,191 @@ kube2   Ready    <none>          15m     v1.28.2   192.168.122.11   <none>      
 kube3   Ready    <none>          6m37s   v1.28.2   192.168.122.12   <none>        Ubuntu 22.04.3 LTS   5.15.0-91-generic   containerd://1.6.26
 kube4   Ready    <none>          23s     v1.28.2   192.168.122.13   <none>        Ubuntu 22.04.3 LTS   5.15.0-91-generic   containerd://1.6.26
 ```
+
+## Install Ansible
+
+```text
+# apt install ansible
+# exit
+$ ansible --version
+ansible 2.10.8
+  config file = /home/joro/WSL2Fun/ansible.cfg
+  configured module search path = ['/home/joro/.ansible/plugins/modules', '/usr/share/ansible/plugins/modules']
+  ansible python module location = /usr/lib/python3/dist-packages/ansible
+  executable location = /usr/bin/ansible
+  python version = 3.10.12 (main, Nov 20 2023, 15:14:05) [GCC 11.4.0]
+```
+
+Test connection to K8s:
+
+```text
+$ ansible-playbook ansible-test.yaml
+[WARNING]: Invalid characters were found in group names but not replaced, use -vvvv to see details
+
+PLAY [Connection test] ****************************************************************************************************************************************************************************************
+
+TASK [Check host] *********************************************************************************************************************************************************************************************
+Tuesday 09 January 2024  16:00:28 +0200 (0:00:00.007)       0:00:00.007 *******
+changed: [kube1]
+changed: [kube4]
+changed: [kube3]
+changed: [kube2]
+
+TASK [Show response] ******************************************************************************************************************************************************************************************
+Tuesday 09 January 2024  16:00:29 +0200 (0:00:01.003)       0:00:01.011 *******
+ok: [kube2] =>
+  msg: |2-
+     16:00:30 up  1:31,  0 users,  load average: 0.03, 0.03, 0.00
+    Linux kube2 5.15.0-91-generic #101-Ubuntu SMP Tue Nov 14 13:30:08 UTC 2023 x86_64 x86_64 x86_64 GNU/Linux
+    kube2
+    uid=0(root) gid=0(root) groups=0(root)
+    VERSION="22.04.3 LTS (Jammy Jellyfish)"
+ok: [kube1] =>
+  msg: |2-
+     16:00:30 up  1:31,  0 users,  load average: 0.20, 0.52, 0.45
+    Linux kube1 5.15.0-91-generic #101-Ubuntu SMP Tue Nov 14 13:30:08 UTC 2023 x86_64 x86_64 x86_64 GNU/Linux
+    kube1
+    uid=0(root) gid=0(root) groups=0(root)
+    VERSION="22.04.3 LTS (Jammy Jellyfish)"
+ok: [kube3] =>
+  msg: |2-
+     16:00:30 up  1:31,  0 users,  load average: 0.16, 0.07, 0.02
+    Linux kube3 5.15.0-91-generic #101-Ubuntu SMP Tue Nov 14 13:30:08 UTC 2023 x86_64 x86_64 x86_64 GNU/Linux
+    kube3
+    uid=0(root) gid=0(root) groups=0(root)
+    VERSION="22.04.3 LTS (Jammy Jellyfish)"
+ok: [kube4] =>
+  msg: |2-
+     16:00:30 up  1:31,  0 users,  load average: 0.00, 0.02, 0.00
+    Linux kube4 5.15.0-91-generic #101-Ubuntu SMP Tue Nov 14 13:30:08 UTC 2023 x86_64 x86_64 x86_64 GNU/Linux
+    kube4
+    uid=0(root) gid=0(root) groups=0(root)
+    VERSION="22.04.3 LTS (Jammy Jellyfish)"
+
+PLAY RECAP ****************************************************************************************************************************************************************************************************
+kube1                      : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+kube2                      : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+kube3                      : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+kube4                      : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+Tuesday 09 January 2024  16:00:29 +0200 (0:00:00.035)       0:00:01.046 *******
+===============================================================================
+Check host --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 1.00s
+Show response ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ 0.04s
+```
+
+## Kube systems management with Ansible
+
+Kube packages are marked as hold in cloud config user-data.yaml
+
+```text
+root@kube1:/home/k8s-admin# dpkg --get-selections | grep kube
+kubeadm                                         hold
+kubectl                                         hold
+kubelet                                         hold
+kubernetes-cni                                  install
+```
+
+Upgrade:
+
+```text
+$ ansible-playbook main.yml --tags "setup"
+[WARNING]: Invalid characters were found in group names but not replaced, use -vvvv to see details
+
+PLAY [Linux host setup] ************************************************************************************************************************************************************
+
+TASK [setup : Allow release-info to change for APT repositories] *******************************************************************************************************************
+Tuesday 09 January 2024  16:25:52 +0200 (0:00:00.007)       0:00:00.007 *******
+[WARNING]: Consider using the apt module rather than running 'apt-get'.  If you need to use command because apt is insufficient you can add 'warn: false' to this command task or
+set 'command_warnings=False' in ansible.cfg to get rid of this message.
+changed: [kube1]
+changed: [kube2]
+changed: [kube3]
+changed: [kube4]
+
+TASK [setup : Upgrade all apt packages] ********************************************************************************************************************************************
+Tuesday 09 January 2024  16:25:57 +0200 (0:00:04.973)       0:00:04.981 *******
+changed: [kube1]
+changed: [kube2]
+changed: [kube3]
+changed: [kube4]
+
+TASK [setup : Show current kernel] *************************************************************************************************************************************************
+Tuesday 09 January 2024  16:26:04 +0200 (0:00:07.173)       0:00:12.154 *******
+changed: [kube4]
+changed: [kube3]
+changed: [kube2]
+changed: [kube1]
+
+TASK [setup : debug] ***************************************************************************************************************************************************************
+Tuesday 09 January 2024  16:26:05 +0200 (0:00:00.160)       0:00:12.315 *******
+ok: [kube1] =>
+  msg: 5.15.0-91-generic
+ok: [kube2] =>
+  msg: 5.15.0-91-generic
+ok: [kube3] =>
+  msg: 5.15.0-91-generic
+ok: [kube4] =>
+  msg: 5.15.0-91-generic
+
+TASK [setup : Check if a reboot is needed for Debian and Ubuntu boxes] *************************************************************************************************************
+Tuesday 09 January 2024  16:26:05 +0200 (0:00:00.031)       0:00:12.346 *******
+ok: [kube4]
+ok: [kube2]
+ok: [kube3]
+ok: [kube1]
+
+TASK [setup : Reboot the Debian or Ubuntu server] **********************************************************************************************************************************
+Tuesday 09 January 2024  16:26:05 +0200 (0:00:00.193)       0:00:12.539 *******
+skipping: [kube1]
+skipping: [kube2]
+skipping: [kube3]
+skipping: [kube4]
+
+TASK [setup : Install additional packages] *****************************************************************************************************************************************
+Tuesday 09 January 2024  16:26:05 +0200 (0:00:00.031)       0:00:12.570 *******
+changed: [kube2]
+changed: [kube3]
+changed: [kube4]
+changed: [kube1]
+
+TASK [setup : Show current kernel] *************************************************************************************************************************************************
+Tuesday 09 January 2024  16:26:12 +0200 (0:00:06.887)       0:00:19.458 *******
+changed: [kube2]
+changed: [kube3]
+changed: [kube4]
+changed: [kube1]
+
+TASK [setup : debug] ***************************************************************************************************************************************************************
+Tuesday 09 January 2024  16:26:12 +0200 (0:00:00.136)       0:00:19.594 *******
+ok: [kube1] =>
+  msg: 5.15.0-91-generic
+ok: [kube2] =>
+  msg: 5.15.0-91-generic
+ok: [kube3] =>
+  msg: 5.15.0-91-generic
+ok: [kube4] =>
+  msg: 5.15.0-91-generic
+
+PLAY RECAP *************************************************************************************************************************************************************************
+kube1                      : ok=8    changed=5    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0
+kube2                      : ok=8    changed=5    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0
+kube3                      : ok=8    changed=5    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0
+kube4                      : ok=8    changed=5    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0
+
+Tuesday 09 January 2024  16:26:12 +0200 (0:00:00.034)       0:00:19.629 *******
+===============================================================================
+setup : Upgrade all apt packages -------------------------------------------------------------------------------------------------------------------------------------------- 7.17s
+setup : Install additional packages ----------------------------------------------------------------------------------------------------------------------------------------- 6.89s
+setup : Allow release-info to change for APT repositories ------------------------------------------------------------------------------------------------------------------- 4.97s
+setup : Check if a reboot is needed for Debian and Ubuntu boxes ------------------------------------------------------------------------------------------------------------- 0.19s
+setup : Show current kernel ------------------------------------------------------------------------------------------------------------------------------------------------- 0.16s
+setup : Show current kernel ------------------------------------------------------------------------------------------------------------------------------------------------- 0.14s
+setup : debug --------------------------------------------------------------------------------------------------------------------------------------------------------------- 0.03s
+setup : debug --------------------------------------------------------------------------------------------------------------------------------------------------------------- 0.03s
+setup : Reboot the Debian or Ubuntu server ---------------------------------------------------------------------------------------------------------------------------------- 0.03s
+```
+
+### Deploy nginx Pod to Kube with Ansible
+
+1

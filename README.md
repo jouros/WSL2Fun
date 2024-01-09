@@ -243,7 +243,7 @@ KVM acceleration can be used
 ```
 
 ```text
-\# cat /sys/module/kvm_intel/parameters/nested
+# cat /sys/module/kvm_intel/parameters/nested
 Y
 ```
 

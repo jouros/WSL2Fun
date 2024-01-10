@@ -894,6 +894,8 @@ helm-addrepo : Repo list -------------------------------------------------------
 helm-addrepo : debug ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 0.02s
 ```
 
+In above I had set 'REPONAME: bitnami' and 'REPOURL: "https://charts.bitnami.com/bitnami" in main.yml variables.
+
 Now we can use Bitnami packaged nginx:
 
 ```text
@@ -993,7 +995,7 @@ Commercial support is available at
 </html>
 ```
 
-Next I'll add Swiss army knife Busybox, this time I'll use my custom helm chart for which I have created chart repo in github:
+Next I'll add Swiss army knife Busybox, this time I'll use my selfmade helm chart for which I have created chart repo in my github:
 
 ```text
 $ helm repo add custom-repo https://jouros.github.io/helm-repo
@@ -1004,5 +1006,97 @@ custom-repo     https://jouros.github.io/helm-repo
 $ helm search repo busybox
 NAME                    CHART VERSION   APP VERSION     DESCRIPTION
 custom-repo/busybox     0.0.1           latest          A Helm chart for Kubernetes
+```
+
+Let's add custom-repo with Ansible role 'helm-addrepo', this time I used variables 'REPONAME: custom-repo' and 'REPOURL: "https://jouros.github.io/helm-repo"'
+
+```text
+$ ansible-playbook main.yml --tags "helm-addrepo"
+[WARNING]: Invalid characters were found in group names but not replaced, use -vvvv to see details
+[WARNING]: Collection kubernetes.core does not support Ansible version 2.10.8
+
+PLAY [Linux host setup] *********************************************************************************************************************************************************************************
+
+TASK [helm-addrepo : Add bitnami helm repo] *************************************************************************************************************************************************************
+Wednesday 10 January 2024  16:55:14 +0200 (0:00:00.008)       0:00:00.008 *****
+changed: [kube1]
+
+TASK [helm-addrepo : Update repo cache to show additions] ***********************************************************************************************************************************************
+Wednesday 10 January 2024  16:55:14 +0200 (0:00:00.712)       0:00:00.721 *****
+ok: [kube1]
+
+TASK [helm-addrepo : Repo list] *************************************************************************************************************************************************************************
+Wednesday 10 January 2024  16:55:16 +0200 (0:00:01.363)       0:00:02.084 *****
+changed: [kube1]
+
+TASK [helm-addrepo : debug] *****************************************************************************************************************************************************************************
+Wednesday 10 January 2024  16:55:16 +0200 (0:00:00.168)       0:00:02.253 *****
+ok: [kube1] =>
+  msg: |-
+    NAME            URL
+    bitnami         https://charts.bitnami.com/bitnami
+    custom-repo     https://jouros.github.io/helm-repo
+
+PLAY RECAP **********************************************************************************************************************************************************************************************
+kube1                      : ok=4    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+Wednesday 10 January 2024  16:55:16 +0200 (0:00:00.020)       0:00:02.274 *****
+===============================================================================
+helm-addrepo : Update repo cache to show additions ----------------------------------------------------------------------------------------------------------------------------------------------- 1.36s
+helm-addrepo : Add bitnami helm repo ------------------------------------------------------------------------------------------------------------------------------------------------------------- 0.71s
+helm-addrepo : Repo list ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 0.17s
+helm-addrepo : debug ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 0.02s
+```
+
+Now everyhting is ready for Busybox deployment:
+
+```text
+$ ansible-playbook main.yml --tags "helm-busybox"
+[WARNING]: Invalid characters were found in group names but not replaced, use -vvvv to see details
+[WARNING]: Collection kubernetes.core does not support Ansible version 2.10.8
+
+PLAY [Linux host setup] *********************************************************************************************************************************************************************************
+
+TASK [helm-busybox : Update repo cache to show additions] ***********************************************************************************************************************************************
+Wednesday 10 January 2024  17:00:44 +0200 (0:00:00.009)       0:00:00.009 *****
+ok: [kube1]
+
+TASK [helm-busybox : Deploy Busybox] ********************************************************************************************************************************************************************
+Wednesday 10 January 2024  17:00:45 +0200 (0:00:01.428)       0:00:01.437 *****
+changed: [kube1]
+
+TASK [helm-busybox : debug] *****************************************************************************************************************************************************************************
+Wednesday 10 January 2024  17:00:46 +0200 (0:00:00.887)       0:00:02.324 *****
+ok: [kube1] =>
+  msg: |-
+    Release "busybox" does not exist. Installing it now.
+    NAME: busybox
+    LAST DEPLOYED: Wed Jan 10 17:00:46 2024
+    NAMESPACE: test1
+    STATUS: deployed
+    REVISION: 1
+    NOTES:
+    Busybox
+
+    namespace test1
+    app busybox
+
+PLAY RECAP **********************************************************************************************************************************************************************************************
+kube1                      : ok=3    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+Wednesday 10 January 2024  17:00:46 +0200 (0:00:00.019)       0:00:02.344 *****
+===============================================================================
+helm-busybox : Update repo cache to show additions ----------------------------------------------------------------------------------------------------------------------------------------------- 1.43s
+helm-busybox : Deploy Busybox -------------------------------------------------------------------------------------------------------------------------------------------------------------------- 0.89s
+helm-busybox : debug ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 0.02s
+```
+
+Pod check from control-plane:
+
+```text
+k8s-admin@kube1:~$ kubectl get pods -n test1
+NAME                     READY   STATUS    RESTARTS   AGE
+busybox-q4cmf            1/1     Running   0          46s
+nginx-7975748858-w4zwj   1/1     Running   0          3h5m
 ```
 

@@ -837,6 +837,161 @@ version.BuildInfo{Version:"v3.13.3", GitCommit:"c8b948945e52abba22ff885446a1486c
 ```
 
 
-### Deploy nginx Pod to Kube with Ansible
+### Deploy Pods to Kube with Ansible
 
-1
+In this part I will deploy nginx and busybox Pods to Kube. Here we need to install additional modules for Ansible:
+
+```text
+$ ansible-galaxy collection install kubernetes.core
+Starting galaxy collection install process
+Process install dependency map
+Starting collection install process
+Installing 'kubernetes.core:3.0.0' to '/home/joro/WSL2Fun/collections/ansible_collections/kubernetes/core'
+Downloading https://galaxy.ansible.com/api/v3/plugin/ansible/content/published/collections/artifacts/kubernetes-core-3.0.0.tar.gz to /home/joro/.ansible/tmp/ansible-local-2156mb_b7jja/tmpi35l90rv
+kubernetes.core (3.0.0) was installed successfully
+```
+
+Modules will be installed into ./collections path as is configured in ansible.cfg
+
+Next we have to add repositorires for Helm, very good starting point is to add Bitnami:
+
+```text
+$ ansible-playbook main.yml --tags "helm-addrepo"
+[WARNING]: Invalid characters were found in group names but not replaced, use -vvvv to see details
+[WARNING]: Collection kubernetes.core does not support Ansible version 2.10.8
+
+PLAY [Linux host setup] *********************************************************************************************************************************************************************************
+
+TASK [helm-addrepo : Add bitnami helm repo] *************************************************************************************************************************************************************
+Wednesday 10 January 2024  13:33:04 +0200 (0:00:00.009)       0:00:00.009 *****
+[WARNING]: Module remote_tmp /home/k8s-admin/.ansible/tmp did not exist and was created with a mode of 0700, this may cause issues when running as another user. To avoid this, create the remote_tmp
+dir with the correct permissions manually
+changed: [kube1]
+
+TASK [helm-addrepo : Update repo cache to show additions] ***********************************************************************************************************************************************
+Wednesday 10 January 2024  13:33:06 +0200 (0:00:01.640)       0:00:01.649 *****
+ok: [kube1]
+
+TASK [helm-addrepo : Repo list] *************************************************************************************************************************************************************************
+Wednesday 10 January 2024  13:33:07 +0200 (0:00:01.422)       0:00:03.072 *****
+changed: [kube1]
+
+TASK [helm-addrepo : debug] *****************************************************************************************************************************************************************************
+Wednesday 10 January 2024  13:33:08 +0200 (0:00:00.200)       0:00:03.273 *****
+ok: [kube1] =>
+  msg: |-
+    NAME    URL
+    bitnami https://charts.bitnami.com/bitnami
+
+PLAY RECAP **********************************************************************************************************************************************************************************************
+kube1                      : ok=4    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+Wednesday 10 January 2024  13:33:08 +0200 (0:00:00.019)       0:00:03.293 *****
+===============================================================================
+helm-addrepo : Add bitnami helm repo ------------------------------------------------------------------------------------------------------------------------------------------------------------- 1.64s
+helm-addrepo : Update repo cache to show additions ----------------------------------------------------------------------------------------------------------------------------------------------- 1.42s
+helm-addrepo : Repo list ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 0.20s
+helm-addrepo : debug ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 0.02s
+```
+
+Now we can use Bitnami packaged nginx:
+
+```text
+$ helm search repo nginx
+NAME                                    CHART VERSION   APP VERSION     DESCRIPTION
+bitnami/nginx                           15.6.0          1.25.3          NGINX Open Source is a web server that can be a...
+```
+
+Bitnami nginx deployment with Ansible:
+
+```text
+$ ansible-playbook main.yml --tags "helm-nginx"
+[WARNING]: Invalid characters were found in group names but not replaced, use -vvvv to see details
+[WARNING]: Collection kubernetes.core does not support Ansible version 2.10.8
+
+PLAY [Linux host setup] *********************************************************************************************************************************************************************************
+
+TASK [helm-nginx : Update repo cache to show additions] *************************************************************************************************************************************************
+Wednesday 10 January 2024  13:56:01 +0200 (0:00:00.009)       0:00:00.009 *****
+ok: [kube1]
+
+TASK [helm-nginx : Deploy nginx] ************************************************************************************************************************************************************************
+Wednesday 10 January 2024  13:56:02 +0200 (0:00:01.394)       0:00:01.403 *****
+changed: [kube1]
+
+TASK [helm-nginx : debug] *******************************************************************************************************************************************************************************
+Wednesday 10 January 2024  13:56:05 +0200 (0:00:02.636)       0:00:04.040 *****
+ok: [kube1] =>
+  msg: |-
+    Release "nginx" does not exist. Installing it now.
+    NAME: nginx
+    LAST DEPLOYED: Wed Jan 10 13:56:04 2024
+    NAMESPACE: test1
+    STATUS: deployed
+    REVISION: 1
+    TEST SUITE: None
+    NOTES:
+    CHART NAME: nginx
+    CHART VERSION: 15.6.0
+    APP VERSION: 1.25.3
+
+    ** Please be patient while the chart is being deployed **
+    NGINX can be accessed through the following DNS name from within your cluster:
+
+        nginx.test1.svc.cluster.local (port 80)
+
+    To access NGINX from outside the cluster, follow the steps below:
+
+    1. Get the NGINX URL by running these commands:
+
+        export SERVICE_PORT=$(kubectl get --namespace test1 -o jsonpath="{.spec.ports[0].port}" services nginx)
+        kubectl port-forward --namespace test1 svc/nginx ${SERVICE_PORT}:${SERVICE_PORT} &
+        echo "http://127.0.0.1:${SERVICE_PORT}"
+
+PLAY RECAP **********************************************************************************************************************************************************************************************
+kube1                      : ok=3    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+Wednesday 10 January 2024  13:56:05 +0200 (0:00:00.020)       0:00:04.060 *****
+===============================================================================
+helm-nginx : Deploy nginx ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ 2.64s
+helm-nginx : Update repo cache to show additions ------------------------------------------------------------------------------------------------------------------------------------------------- 1.39s
+helm-nginx : debug ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 0.02s
+```
+
+Check nginx from control-plane:
+
+```text
+$ kubectl get pods -n test1
+NAME                     READY   STATUS    RESTARTS   AGE
+nginx-7975748858-w4zwj   1/1     Running   0          32s
+$ kubectl get svc -n test1
+NAME    TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+nginx   ClusterIP   10.106.91.101   <none>        80/TCP    2m40s
+$ curl http://10.106.91.101
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+html { color-scheme: light dark; }
+body { width: 35em; margin: 0 auto;
+font-family: Tahoma, Verdana, Arial, sans-serif; }
+</style>
+</head>
+<body>
+<h1>Welcome to nginx!</h1>
+<p>If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.</p>
+
+<p>For online documentation and support please refer to
+<a href="http://nginx.org/">nginx.org</a>.<br/>
+Commercial support is available at
+<a href="http://nginx.com/">nginx.com</a>.</p>
+
+<p><em>Thank you for using nginx.</em></p>
+</body>
+</html>
+```
+
+
+

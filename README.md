@@ -995,3 +995,14 @@ Commercial support is available at
 
 Next I'll add Swiss army knife Busybox, this time I'll use my custom helm chart for which I have created chart repo in github:
 
+```text
+$ helm repo add custom-repo https://jouros.github.io/helm-repo
+"custom-repo" has been added to your repositories
+$ helm repo list
+NAME            URL
+custom-repo     https://jouros.github.io/helm-repo
+$ helm search repo busybox
+NAME                    CHART VERSION   APP VERSION     DESCRIPTION
+custom-repo/busybox     0.0.1           latest          A Helm chart for Kubernetes
+```
+

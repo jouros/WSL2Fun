@@ -1,0 +1,25 @@
+---
+# tasks file for helm-nginx
+- name: Update repo cache to show additions
+  kubernetes.core.helm:
+    name: dummy
+    namespace: kube-system
+    state: absent
+    update_repo_cache: true
+
+- name: Deploy nginx 
+  kubernetes.core.helm:
+    name: nginx 
+    chart_ref: bitnami/nginx
+    release_namespace: test1 
+    create_namespace: true 
+    values:
+      service:
+        type: ClusterIP 
+      ingress:
+        enabled: false 
+  register: cmd_out
+
+- debug:
+    msg: "{{ cmd_out.stdout }}"
+...

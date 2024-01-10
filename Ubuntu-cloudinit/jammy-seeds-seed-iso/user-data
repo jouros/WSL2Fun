@@ -1,0 +1,25 @@
+#cloud-config
+hostname: jammy1 
+users:
+  - name: management
+    groups: adm, users, wheel, sudo
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    lock_passwd: false
+    passwd: "$6$DGeCGIvKgmzZptKB$BkpVR.mgu/dyocJ8.TNXwe2pAmnnJfKewxX5SPRsmWV8KaeQWvlYc6qfSrI6qHxQ35E6QzAOCcD0HRFZ1f3ja/"
+    ssh_authorized_keys:
+      - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQD0cX/EUq8+/+SrcmmXFi5O6Y0s3MvzXDRch5obQcmzUxGTHXZ06tE0dqj/iRJNKUSc8V4jma0BX3PGb2QLthOJWpOB/vangkRbG7UdVzELC7T9qu6ip/J3Mo7kSs3FSSJpbb9MrwIFvEm+6mmEObTj+wKg9m4sQmooZQctbAY8bkdoiQo8iPP+gdn5Z50myC0FArNb+hTFrpsn7IB3o77dRZmJz1q1U1vUHS60Iwb8j+LWygh3RgLASgNCZrl6Cdr9S5pg0Llszuykr68iiVpIB1ARZsjY6jbdvjy1hyIgOV5UPAhqvOQMJfPWEfa1d5iTr7D3UH/bkkkYXcyDC7UD/izm/1iIdBOvqJz/r3EpaCtCYmAvkn1dW4uF0M9znSniiJEdnLcEHDXPtSFpWfWNKXRYUDQptRalX1Dy/59WUNnc2zdMH0aYja4EgyaNgQbYOzB7xw4wu7uqZ/0RYwaFvSryS9B08Wj9SDEoWKOJyTuBfJjLst9+WnTDed0DO8s= joro@LAPTOP-2H8O5P68"
+locale: C.UTF-8 
+packages:
+  - git
+  - openssh-server
+package_upgrade: true
+keyboard:
+  layout: fi
+timezone: Europe/Helsinki
+final_message: |
+  cloud-init has finished
+  version: $version
+  timestamp: $timestamp
+  datasource: $datasource
+  uptime: $uptime

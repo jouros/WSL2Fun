@@ -1,0 +1,21 @@
+---
+# tasks file for helm-addrepo
+- name: Add bitnami helm repo
+  kubernetes.core.helm_repository:
+    name: "{{ REPONAME }}" 
+    repo_url: "{{ REPOURL }}" 
+
+- name: Update repo cache to show additions
+  kubernetes.core.helm:
+    name: dummy
+    namespace: kube-system
+    state: absent
+    update_repo_cache: true
+
+- name: Repo list
+  command: helm repo list
+  register: cmd_out
+
+- debug:
+    msg: "{{ cmd_out.stdout }}"
+...

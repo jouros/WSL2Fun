@@ -1,9 +1,15 @@
 ---
 - name: Linux host setup
-  hosts: all 
+  hosts: control-plane 
   gather_facts: no
   vars:
     OS_VERSION: ubuntu
+    REPONAME: custom-repo 
+    REPOURL: "https://jouros.github.io/helm-repo"
   roles:
     - { role: setup, tags: ['setup'] }
+    - { role: helm-deployment, tags: ['helm-deployment'], become: yes }
+    - { role: helm-addrepo, tags: ['helm-addrepo'], become: yes, become_user: k8s-admin } 
+    - { role: helm-nginx, tags: ['helm-nginx'], become: yes, become_user: k8s-admin }
+    - { role: helm-busybox, tags: ['helm-busybox'], become: yes, become_user: k8s-admin }
 ...

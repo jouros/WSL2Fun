@@ -1,0 +1,98 @@
+#cloud-config
+version: 1
+hostname: kube4 
+users:
+  - name: management
+    groups: adm, users, wheel, sudo
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    lock_passwd: false
+    passwd: "$6$DGeCGIvKgmzZptKB$BkpVR.mgu/dyocJ8.TNXwe2pAmnnJfKewxX5SPRsmWV8KaeQWvlYc6qfSrI6qHxQ35E6QzAOCcD0HRFZ1f3ja/"
+    ssh_authorized_keys:
+      - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQD0cX/EUq8+/+SrcmmXFi5O6Y0s3MvzXDRch5obQcmzUxGTHXZ06tE0dqj/iRJNKUSc8V4jma0BX3PGb2QLthOJWpOB/vangkRbG7UdVzELC7T9qu6ip/J3Mo7kSs3FSSJpbb9MrwIFvEm+6mmEObTj+wKg9m4sQmooZQctbAY8bkdoiQo8iPP+gdn5Z50myC0FArNb+hTFrpsn7IB3o77dRZmJz1q1U1vUHS60Iwb8j+LWygh3RgLASgNCZrl6Cdr9S5pg0Llszuykr68iiVpIB1ARZsjY6jbdvjy1hyIgOV5UPAhqvOQMJfPWEfa1d5iTr7D3UH/bkkkYXcyDC7UD/izm/1iIdBOvqJz/r3EpaCtCYmAvkn1dW4uF0M9znSniiJEdnLcEHDXPtSFpWfWNKXRYUDQptRalX1Dy/59WUNnc2zdMH0aYja4EgyaNgQbYOzB7xw4wu7uqZ/0RYwaFvSryS9B08Wj9SDEoWKOJyTuBfJjLst9+WnTDed0DO8s= joro@LAPTOP-2H8O5P68"
+  - name: k8s-admin
+    groups: adm, users, wheel, sudo
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    lock_passwd: true
+    ssh_authorized_keys:
+      - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQD0cX/EUq8+/+SrcmmXFi5O6Y0s3MvzXDRch5obQcmzUxGTHXZ06tE0dqj/iRJNKUSc8V4jma0BX3PGb2QLthOJWpOB/vangkRbG7UdVzELC7T9qu6ip/J3Mo7kSs3FSSJpbb9MrwIFvEm+6mmEObTj+wKg9m4sQmooZQctbAY8bkdoiQo8iPP+gdn5Z50myC0FArNb+hTFrpsn7IB3o77dRZmJz1q1U1vUHS60Iwb8j+LWygh3RgLASgNCZrl6Cdr9S5pg0Llszuykr68iiVpIB1ARZsjY6jbdvjy1hyIgOV5UPAhqvOQMJfPWEfa1d5iTr7D3UH/bkkkYXcyDC7UD/izm/1iIdBOvqJz/r3EpaCtCYmAvkn1dW4uF0M9znSniiJEdnLcEHDXPtSFpWfWNKXRYUDQptRalX1Dy/59WUNnc2zdMH0aYja4EgyaNgQbYOzB7xw4wu7uqZ/0RYwaFvSryS9B08Wj9SDEoWKOJyTuBfJjLst9+WnTDed0DO8s= joro@LAPTOP-2H8O5P68" 
+locale: C.UTF-8 
+package_update: true
+package_upgrade: true
+package_reboot_if_required: false
+packages:
+  - git
+  - openssh-server
+  - nfs-common
+  - python3-pip
+  - jq
+  - acl
+  - acct
+  - tree
+  - net-tools
+  - gnupg2
+  - expect
+  - apt-transport-https
+  - software-properties-common
+  - ca-certificates
+  - curl
+  - uidmap
+  - ipvsadm
+  - apt-transport-https
+  - aria2
+  - qemu-guest-agent
+  - containerd.io
+apt:
+  sources:
+    docker.list:
+      source: "deb [arch=amd64] https://download.docker.com/linux/ubuntu/ jammy stable"
+      keyid: 8D81803C0EBFCD88
+      keyserver: "https://download.docker.com/linux/ubuntu/gpg"
+keyboard:
+  layout: fi
+timezone: Europe/Helsinki
+storage:
+  swap:
+    size: 0
+write_files:
+  - path: /etc/modules-load.d/containerd.conf
+    content: |
+      overlay
+      br_netfilter
+    owner: root:root
+    permissions: '0644'
+  - path: /etc/sysctl.d/99-kubernetes-cri.conf
+    content: |
+      net.bridge.bridge-nf-call-iptables  = 1
+      net.ipv4.ip_forward                 = 1
+      net.bridge.bridge-nf-call-ip6tables = 1
+    owner: root:root
+    permissions: '0644'
+runcmd:
+  - systemctl start qemu-guest-agent
+  - systemctl enable qemu-guest-agent
+  - modprobe overlay
+  - modprobe br_netfilter
+  - sysctl --system
+  - containerd config default | tee /etc/containerd/config.toml >/dev/null 2>&1
+  - systemctl enable containerd
+  - sed -i -e 's/SystemdCgroup \= false/systemdCgroup \= true/g' /etc/containerd/config.toml
+  - sed -i -e 's/PermitRootLogin\s*yes/PermitRootLogin no/g' /etc/ssh/sshd_config
+  - sed -i -e 's/#*\sPermitRootLogin/PermitRootLogin/g' /etc/ssh/sshd_config
+  - curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
+  - echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | tee /etc/apt/sources.list.d/kubernetes.list
+  - apt-get update
+  - apt install -y kubelet kubeadm kubectl
+  - apt-mark hold kubelet kubeadm kubectl
+final_message: |
+  cloud-init has finished
+  version: $version
+  timestamp: $timestamp
+  datasource: $datasource
+  uptime: $uptime
+power_state:
+  delay: now
+  mode: reboot
+  message: Bye Bye
+  condition: true

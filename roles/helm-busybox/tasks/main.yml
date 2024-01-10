@@ -1,0 +1,27 @@
+---
+# tasks file for helm-busybox
+- name: Update repo cache to show additions 
+  kubernetes.core.helm:
+    name: dummy
+    namespace: kube-system
+    state: absent
+    update_repo_cache: true
+
+- name: Deploy Busybox 
+  kubernetes.core.helm:
+    name: busybox 
+    chart_ref: custom-repo/busybox
+    release_namespace: test1 
+    create_namespace: false 
+    chart_version: 0.0.1
+    values:
+      service:
+        type: ClusterIP 
+      restartPolicy: Never
+      busyboxruntimeinsecs: 600
+  register: cmd_out
+
+- debug:
+    msg: "{{ cmd_out.stdout }}"
+...
+

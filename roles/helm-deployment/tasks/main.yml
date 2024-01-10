@@ -1,0 +1,32 @@
+---
+# tasks file for helm-deployment
+- name: Get repo key
+  get_url: 
+    url: https://baltocdn.com/helm/signing.asc
+    dest: /usr/share/keyrings/helm.asc
+    mode: '0644' 
+
+- name: Add repository to sources.list
+  apt_repository:
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/helm.asc] https://baltocdn.com/helm/stable/debian/ all main"
+    state: present
+
+- name: Install Helm
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+  register: task_result
+  until: task_result is success
+  retries: 20
+  delay: 2
+  vars:
+    packages:
+      - helm
+
+- name: Hold Helm
+  dpkg_selections:
+    name: helm
+    selection: hold
+  register: cmd_out
+...

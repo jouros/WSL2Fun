@@ -1,0 +1,4 @@
+#cloud-config
+cloud_name: jrc
+distro: ubuntu
+distro_version: jammy

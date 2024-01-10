@@ -829,12 +829,12 @@ helm-deployment : Get repo key -------------------------------------------------
 helm-deployment : Hold Helm ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- 0.19s
 ```
 
+Helm v3.13.3 was latest at a time. Package is also marked as 'hold' so this deployment will stay in that version
+
 ```text
 k8s-admin@kube1:~$ helm version
 version.BuildInfo{Version:"v3.13.3", GitCommit:"c8b948945e52abba22ff885446a1486cb5fd3474", GitTreeState:"clean", GoVersion:"go1.20.11"}
 ```
-
-Helm v3.13.3 was latest at a time. Package is also marked as 'hold' so this deployment will stay in that version
 
 
 ### Deploy nginx Pod to Kube with Ansible

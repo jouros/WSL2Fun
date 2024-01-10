@@ -792,7 +792,49 @@ setup : Reboot the Debian or Ubuntu server -------------------------------------
 
 ### Deploy Helm to Kube with Ansible
 
-Helm is defacto package manager for K8s and I prefer to use it everywhere. 
+Helm is defacto package manager for K8s and I prefer to use it everywhere. Helm can be deployed to control-plane with:
+
+```text
+$ ansible-playbook main.yml --tags "helm-deployment"
+[WARNING]: Invalid characters were found in group names but not replaced, use -vvvv to see details
+
+PLAY [Linux host setup] *********************************************************************************************************************************************************************************
+
+TASK [helm-deployment : Get repo key] *******************************************************************************************************************************************************************
+Wednesday 10 January 2024  11:15:12 +0200 (0:00:00.011)       0:00:00.011 *****
+[WARNING]: Module remote_tmp /root/.ansible/tmp did not exist and was created with a mode of 0700, this may cause issues when running as another user. To avoid this, create the remote_tmp dir with the
+correct permissions manually
+changed: [kube1]
+
+TASK [helm-deployment : Add repository to sources.list] *************************************************************************************************************************************************
+Wednesday 10 January 2024  11:15:13 +0200 (0:00:00.899)       0:00:00.910 *****
+changed: [kube1]
+
+TASK [helm-deployment : Install Helm] *******************************************************************************************************************************************************************
+Wednesday 10 January 2024  11:15:16 +0200 (0:00:03.382)       0:00:04.292 *****
+changed: [kube1]
+
+TASK [helm-deployment : Hold Helm] **********************************************************************************************************************************************************************
+Wednesday 10 January 2024  11:15:20 +0200 (0:00:04.138)       0:00:08.430 *****
+changed: [kube1]
+
+PLAY RECAP **********************************************************************************************************************************************************************************************
+kube1                      : ok=4    changed=4    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+Wednesday 10 January 2024  11:15:20 +0200 (0:00:00.188)       0:00:08.619 *****
+===============================================================================
+helm-deployment : Install Helm ------------------------------------------------------------------------------------------------------------------------------------------------------------------- 4.14s
+helm-deployment : Add repository to sources.list ------------------------------------------------------------------------------------------------------------------------------------------------- 3.38s
+helm-deployment : Get repo key ------------------------------------------------------------------------------------------------------------------------------------------------------------------- 0.90s
+helm-deployment : Hold Helm ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- 0.19s
+```
+
+```text
+k8s-admin@kube1:~$ helm version
+version.BuildInfo{Version:"v3.13.3", GitCommit:"c8b948945e52abba22ff885446a1486cb5fd3474", GitTreeState:"clean", GoVersion:"go1.20.11"}
+```
+
+Helm v3.13.3 was latest at a time. Package is also marked as 'hold' so this deployment will stay in that version
 
 
 ### Deploy nginx Pod to Kube with Ansible

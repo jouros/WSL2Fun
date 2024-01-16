@@ -51,6 +51,17 @@ sparseVhd=true
 
 ## WSL2 basic commands
 
+wsl -v
+```text
+WSL version: 2.1.0.0
+Kernel version: 5.15.137.3-1
+WSLg version: 1.0.59
+MSRDC version: 1.2.4677
+Direct3D version: 1.611.1-81528511
+DXCore version: 10.0.25131.1002-220531-1700.rs-onecore-base2-hyp
+Windows version: 10.0.22635.3061
+```
+
 wsl -l -v
 ```text
   NAME                   STATE           VERSION

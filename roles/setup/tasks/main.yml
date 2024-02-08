@@ -50,6 +50,7 @@
   vars:
     packages:
       - arp-scan 
+      - net-tools
 
 - name: Show current kernel
   command: uname -r

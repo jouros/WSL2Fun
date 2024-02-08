@@ -1,0 +1,50 @@
+---
+# tasks file for helm-sidecaragent
+- name: Update repo cache to show additions
+  kubernetes.core.helm:
+    name: dummy
+    namespace: kube-system
+    state: absent
+    update_repo_cache: true
+
+- name: Hashicorp Sidecar Agent Injector helm deployment
+  kubernetes.core.helm:
+    name: vault-k8s 
+    chart_ref: hashicorp/vault 
+    chart_version: 0.27.0
+    release_namespace: "{{ NAMESPACE }}" 
+    create_namespace: false
+    atomic: true
+    values:
+      global:
+        enabled: false
+        tlsDisable: true 
+        externalVaultAddr: "{{ VAULTADDR }}"
+      injector:
+        enabled: true
+        metrics:
+          enabled: false 
+        image:
+          repository: hashicorp/vault-k8s
+          tag: "{{ VAULT_K8S_TAG }}"
+        agentImage:
+          repository: hashicorp/vault
+          tag: "{{ VAULT_TAG }}"
+        agentDefaults:
+          template: "json"
+        authPath: "auth/kubernetes" 
+        logLevel: "{{ LOG_LEVEL }}"
+  register: cmd_out
+
+- debug:
+    msg: "{{ cmd_out.stdout }}"
+
+- name: Get Pods from namespace
+  kubernetes.core.k8s_info:
+    kind: Pod
+    namespace: "{{ NAMESPACE }}" 
+  register: pod_list
+
+- debug:
+    msg: "{{ pod_list | json_query('resources[*].metadata.name') }}"
+...

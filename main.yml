@@ -4,12 +4,20 @@
   gather_facts: no
   vars:
     OS_VERSION: ubuntu
-    REPONAME: custom-repo 
-    REPOURL: "https://jouros.github.io/helm-repo"
+    REPONAME: hashicorp 
+    REPOURL: "https://helm.releases.hashicorp.com"
+    VAULTADDR: "https://192.168.122.14:8200"
+    NAMESPACE: "test2"
+    VAULT_K8S_TAG: "1.3.1"
+    VAULT_TAG: "1.15.2"
+    LOG_LEVEL: "debug" # log levels include: trace, debug, info, warn, error
   roles:
     - { role: setup, tags: ['setup'] }
+    - { role: ansiblepip, tags: ['ansiblepip'], become: yes, become_user: k8s-admin } # Needed by kubernetes.core.k8s_*
     - { role: helm-deployment, tags: ['helm-deployment'], become: yes }
     - { role: helm-addrepo, tags: ['helm-addrepo'], become: yes, become_user: k8s-admin } 
     - { role: helm-nginx, tags: ['helm-nginx'], become: yes, become_user: k8s-admin }
     - { role: helm-busybox, tags: ['helm-busybox'], become: yes, become_user: k8s-admin }
+    - { role: helm-mypythonapp, tags: ['helm-mypythonapp'], become: yes, become_user: k8s-admin }
+    - { role: helm-sidecaragent, tags: ['helm-sidecaragent'], become: yes, become_user: k8s-admin }
 ...

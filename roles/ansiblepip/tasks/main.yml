@@ -1,0 +1,7 @@
+---
+# tasks file for ansiblepip
+- name: Check if kubernetes python is installed, needed by kubernetes.core.k8s*
+  pip:
+    name: kubernetes
+    state: present
+...

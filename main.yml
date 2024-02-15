@@ -20,4 +20,7 @@
     - { role: helm-busybox, tags: ['helm-busybox'], become: yes, become_user: k8s-admin }
     - { role: helm-mypythonapp, tags: ['helm-mypythonapp'], become: yes, become_user: k8s-admin }
     - { role: helm-sidecaragent, tags: ['helm-sidecaragent'], become: yes, become_user: k8s-admin }
+    - { role: kubernetes-secret, tags: ['kubernetes-secret'], become: yes, become_user: k8s-admin }
+    - { role: kubernetes-sa, tags: ['kubernetes-sa'], become: yes, become_user: k8s-admin }
+    - { role: kubernetes-rbac, tags: ['kubernetes-rbac'], become: yes, become_user: k8s-admin }
 ...

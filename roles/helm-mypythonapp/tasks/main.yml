@@ -13,7 +13,7 @@
     chart_ref: custom-repo/mypythonapp
     release_namespace: test2
     create_namespace: false
-    chart_version: 0.0.2
+    chart_version: 0.0.7
     values:
       service:
         type: ClusterIP

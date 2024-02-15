@@ -1,0 +1,26 @@
+---
+# tasks file for kubernetes-sa
+- name: Create Kubernetes ServiceAccount 
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: ServiceAccount 
+      metadata:
+        name: mypythonappsa 
+        namespace: test2
+      automountServiceAccountToken: true 
+  register: cmd_out
+
+- debug:
+    msg: "{{ cmd_out }}"
+
+- name: Get secrets from namespace
+  kubernetes.core.k8s_info:
+    kind: ServiceAccount 
+    namespace: "{{ NAMESPACE }}"
+  register: secrets_out
+
+- debug:
+    msg: "{{ secrets_out | json_query('resources[*].metadata.name') }}"
+...

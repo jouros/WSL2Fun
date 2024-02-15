@@ -1,0 +1,28 @@
+---
+# tasks file for kubernetes-secret
+- name: Create Kubernetes secret
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: vault-auth-secret
+        namespace: test2
+        annotations:
+          kubernetes.io/service-account.name: mypythonappsa
+      type: kubernetes.io/service-account-token
+  register: cmd_out
+
+- debug:
+    msg: "{{ cmd_out }}"
+
+- name: Get secrets from namespace
+  kubernetes.core.k8s_info:
+    kind: Secret
+    namespace: "{{ NAMESPACE }}"
+  register: secrets_out
+
+- debug:
+    msg: "{{ secrets_out | json_query('resources[*].metadata.name') }}"
+...

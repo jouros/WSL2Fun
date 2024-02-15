@@ -1,0 +1,32 @@
+---
+# tasks file for kubernetes-rbac
+- name: Create Kubernetes Kubernetes RBAC for Vault TokenReview API call 
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: ClusterRoleBinding 
+      metadata:
+        name: role-tokenreview-binding 
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+        name: system:auth-delegator
+      subjects: 
+        - kind: ServiceAccount
+          name: mypythonappsa
+          namespace: test2
+  register: cmd_out
+
+- debug:
+    msg: "{{ cmd_out }}"
+
+- name: Get secrets from namespace
+  kubernetes.core.k8s_info:
+    kind: ClusterRoleBinding 
+    namespace: "{{ NAMESPACE }}"
+  register: secrets_out
+
+- debug:
+    msg: "{{ secrets_out | json_query('resources[*].metadata.name') }}"
+...

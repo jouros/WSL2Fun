@@ -1,0 +1,10 @@
+---
+# tasks file for download-flux
+- name: "Download Flux {{ VERSION1 }}"
+  get_url:
+    url: "https://github.com/fluxcd/flux2/releases/download/{{ VERSION1 }}/flux_{{ VERSION2 }}_linux_amd64.tar.gz"
+    dest: "{{ playbook_dir }}/roles/deploy-flux/files"
+    mode: 0755
+    checksum: "{{ CHECKSUM }}"
+...
+

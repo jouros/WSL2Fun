@@ -1,0 +1,17 @@
+---
+# tasks file for flux-hubsecret
+- name: "Create {{ NAMESPACE }} namespace if doesn't exist"
+  kubernetes.core.k8s:
+    name: "{{ NAMESPACE }}"
+    api_version: v1
+    kind: Namespace
+    state: present
+
+- name: "Create Flux OCI secret into namespace '{{ NAMESPACE }}'"
+  shell: |
+    flux create secret {{ SECRET_TYPE | quote }} {{ SECRETNAME | quote }} --url={{ DOCKERHUB | quote }} --username={{ DOCKER_USERNAME | quote }} --password={{ DOCKER_PWD | quote }} --namespace={{ NAMESPACE | quote }} --export > ~{{ EXPORT | quote }} 
+  register: cmd_out
+
+- debug:
+    msg: "{{ cmd_out.stdout }}"
+...

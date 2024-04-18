@@ -8,7 +8,7 @@
       kind: Secret
       metadata:
         name: vault-auth-secret
-        namespace: test2
+        namespace: "{{ NAMESPACE }}" 
         annotations:
           kubernetes.io/service-account.name: mypythonappsa
       type: kubernetes.io/service-account-token

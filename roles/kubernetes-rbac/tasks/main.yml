@@ -15,7 +15,7 @@
       subjects: 
         - kind: ServiceAccount
           name: mypythonappsa
-          namespace: test2
+          namespace: "{{ NAMESPACE }}" 
   register: cmd_out
 
 - debug:

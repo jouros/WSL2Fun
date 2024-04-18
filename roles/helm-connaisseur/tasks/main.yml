@@ -1,0 +1,108 @@
+---
+# tasks file for helm-connaisseur
+- name: Update repo cache to show additions
+  kubernetes.core.helm:
+    name: dummy
+    namespace: kube-system
+    state: absent
+    update_repo_cache: true
+
+- name: Connaisseur deployment
+  kubernetes.core.helm:
+    name: connaisseur 
+    chart_ref: connaisseur/connaisseur
+    chart_version: 2.3.4 
+    release_namespace: connaisseur
+    create_namespace: true
+    atomic: true
+    values:
+      kubernetes:
+        deployment:
+          image:
+            repository: docker.io/securesystemsengineering/connaisseur
+      application:
+        logLevel: DEBUG
+        validators:
+          - name: allow
+            type: static
+            approve: true
+          - name: deny
+            type: static
+            approve: false
+          - name: default
+            type: notaryv1
+            host: notary.docker.io
+            trustRoots:
+              - name: default 
+                key: |
+                  -----BEGIN PUBLIC KEY-----
+                  MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEOXYta5TgdCwXTCnLU09W5T4M4r9f
+                  QQrqJuADP6U7g5r9ICgPSmZuRHP/1AYUfOQW3baveKsT969EfELKj1lfCA==
+                  -----END PUBLIC KEY-----
+          - name: selfhostedrunner 
+            type: notaryv1  
+            host: notary.docker.io
+            trustRoots:
+              - name: rootkey
+                key: |
+                  -----BEGIN PUBLIC KEY-----
+                  MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE3emk7zw/3/Io7U3uTFHc1QShztwx
+                  i4kSpNTxNPhzMawCYz+Bm3QDDiG5SI3aa94C4p6r2/G8A++olF/voc3+IQ==
+                  -----END PUBLIC KEY-----
+            auth:
+              username: "{{ HUBUSER }}"
+              password: "{{ HUBPWD }}"
+          - name: dockerhub-basics
+            type: notaryv1
+            host: notary.docker.io
+            trustRoots:
+              - name: docker-official
+                key: |
+                  -----BEGIN PUBLIC KEY-----
+                  MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEOXYta5TgdCwXTCnLU09W5T4M4r9f
+                  QQrqJuADP6U7g5r9ICgPSmZuRHP/1AYUfOQW3baveKsT969EfELKj1lfCA==
+                  -----END PUBLIC KEY-----
+              - name: securesystemsengineering-official
+                key: |
+                  -----BEGIN PUBLIC KEY-----
+                  MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEsx28WV7BsQfnHF1kZmpdCTTLJaWe
+                  d0CA+JOi8H4REuBaWSZ5zPDe468WuOJ6f71E7WFg3CVEVYHuoZt2UYbN/Q==
+                  -----END PUBLIC KEY-----
+        policy:
+          - pattern: "*:*"
+          - pattern: "docker.io/library/*:*"
+            validator: dockerhub-basics
+            with:
+              trustRoot: docker-official
+          - pattern: "docker.io/securesystemsengineering/*:*"
+            validator: dockerhub-basics
+            with:
+              trustRoot: securesystemsengineering-official
+          - pattern: "registry.k8s.io/*:*"
+            validator: allow
+          - pattern: "docker.io/calico/*"
+            validator: allow
+          - pattern: "docker.io/hashicorp/*"
+            validator: allow
+          - pattern: "ghcr.io/fluxcd/*"
+            validator: allow
+          - pattern: "docker.io/jrcjoro1/*:*"
+            validator: selfhostedrunner
+            with:
+              trustRoot: rootkey
+  register: cmd_out
+
+- debug:
+    msg: "{{ cmd_out.stdout }}"
+
+- name: Get Pods from connaisseur namespace
+  become: yes
+  become_user: k8s-admin
+  kubernetes.core.k8s_info:
+    kind: Pod
+    namespace: connaisseur 
+  register: pod_list
+
+- debug:
+    msg: "{{ pod_list | json_query('resources[*].metadata.name') }}"
+...

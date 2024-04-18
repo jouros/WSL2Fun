@@ -8,7 +8,7 @@
       kind: ServiceAccount 
       metadata:
         name: mypythonappsa 
-        namespace: test2
+        namespace: "{{ NAMESPACE }}" 
       automountServiceAccountToken: true 
   register: cmd_out
 

@@ -1,0 +1,12 @@
+---
+# tasks file for bootstrap-flux
+- name: "Flux bootstrap to git folder {{ GITREPO }}"
+  shell: |
+    flux bootstrap github --owner={{ OWNER }} --repository={{ REPOSITORY }} --branch={{ BRANCH }} --path={{ CLUSTER | quote }} --personal --private --timeout={{ TIMEOUT }} --verbose
+  register: cmd_out
+  environment:
+    GITHUB_TOKEN: "{{ GITHUB_TOKEN }}"
+
+- debug:
+    msg: "{{ cmd_out }}"
+...

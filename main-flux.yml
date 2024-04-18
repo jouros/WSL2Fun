@@ -1,0 +1,33 @@
+---
+- name: Kube Flux deployment 
+  hosts: control-plane 
+  gather_facts: no 
+  vars:
+    TARGET: kubernetes
+    VERSION1: v2.2.3
+    VERSION2: 2.2.3
+    CHECKSUM: "sha256:9a705df552df5ac638f93d7fc43d9d8cda6a78f01a16736ae6f355f4a84ebdb3"
+    GITREPO: "FLuxKube1"
+    GITHUB_TOKEN: "{{ lookup('ansible.builtin.env', 'GITHUB_TOKEN') }}"
+    CLUSTER: "clusters/kube1"
+    NAMESPACE: "test2"
+    SECRET_TYPE: "oci"
+    SECRETNAME: "fluxregcred"
+    DOCKERHUB: "docker.io" # OCI format
+    REGISTRY: "ghcr.io/fluxcd"
+    DOCKER_USERNAME:  "{{ lookup('ansible.builtin.env', 'HUBUSER') }}"
+    DOCKER_PWD:  "{{ lookup('ansible.builtin.env', 'HUBPWD') }}"
+    DOCKER_EMAIL: "jouni.rosenlof@jrcomplex.fi"
+    OWNER: "{{ lookup('ansible.builtin.env', 'GITHUB_USERNAME') }}"
+    REPOSITORY: "FluxKube1"
+    TIMEOUT: "2m0s"
+    BRANCH: "main"
+    EXPORT: "/Flux/repo-auth.yaml"
+  roles:
+    - { role: download-flux, tags: ['download-flux'], delegate_to: 127.0.0.1 }
+    - { role: deploy-flux, tags: ['deploy-flux'], become: yes }
+    - { role: precheck-flux, tags: ['precheck-flux'], become: yes, become_user: k8s-admin }
+    - { role: flux-hubsecret, tags: ['flux-hubsecret'], become: yes, become_user: k8s-admin }
+    - { role: deploy-fluxhubsecret, tags: ['deploy-fluxhubsecret'], become: yes, become_user: k8s-admin }
+    - { role: bootstrap-flux, tags: ['bootstrap-flux'], become: yes, become_user: k8s-admin }
+...

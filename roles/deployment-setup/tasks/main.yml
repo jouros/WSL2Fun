@@ -1,0 +1,17 @@
+---
+# tasks file for deployment-setup
+- name: "Create {{ NAMESPACE }} namespace if doesn't exist"
+  kubernetes.core.k8s:
+    name: "{{ NAMESPACE }}"
+    api_version: v1
+    kind: Namespace
+    state: present
+
+- name: "Create docker pull secret into namespace '{{ NAMESPACE }}'"
+  shell: | 
+    kubectl create secret {{ SECRET_TYPE | quote }} {{ SECRETNAME | quote }} --docker-server={{ DOCKERHUB | quote }} --docker-username={{ DOCKER_USERNAME | quote }} --docker-password={{ DOCKER_PWD | quote }} --docker-email={{ DOCKER_EMAIL | quote }} --namespace={{ NAMESPACE | quote }} 
+  register: cmd_out
+
+- debug:
+    msg: "{{ cmd_out.stdout }}"
+...

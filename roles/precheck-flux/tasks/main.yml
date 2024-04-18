@@ -1,0 +1,10 @@
+---
+# tasks file for precheck-flux
+- name: Execute flux check --pre
+  shell: |
+    flux check --pre 
+  register: cmd_out
+
+- debug: 
+    msg: "{{ cmd_out.stderr_lines }}"
+...

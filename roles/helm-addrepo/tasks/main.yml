@@ -1,6 +1,6 @@
 ---
 # tasks file for helm-addrepo
-- name: Add bitnami helm repo
+- name: Add helm repo
   kubernetes.core.helm_repository:
     name: "{{ REPONAME }}" 
     repo_url: "{{ REPOURL }}" 

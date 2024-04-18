@@ -4,13 +4,15 @@
   gather_facts: no
   vars:
     OS_VERSION: ubuntu
-    REPONAME: hashicorp 
-    REPOURL: "https://helm.releases.hashicorp.com"
+    REPONAME: connaisseur 
+    REPOURL: "https://sse-secure-systems.github.io/connaisseur/charts"
     VAULTADDR: "https://192.168.122.14:8200"
     NAMESPACE: "test2"
-    VAULT_K8S_TAG: "1.3.1"
+    VAULT_K8S_TAG: "1.4.0"
     VAULT_TAG: "1.15.2"
     LOG_LEVEL: "debug" # log levels include: trace, debug, info, warn, error
+    HUBUSER: "{{ lookup('ansible.builtin.env', 'HUBUSER') }}"
+    HUBPWD: "{{ lookup('ansible.builtin.env', 'HUBPWD') }}"
   roles:
     - { role: setup, tags: ['setup'] }
     - { role: ansiblepip, tags: ['ansiblepip'], become: yes, become_user: k8s-admin } # Needed by kubernetes.core.k8s_*
@@ -23,4 +25,6 @@
     - { role: kubernetes-secret, tags: ['kubernetes-secret'], become: yes, become_user: k8s-admin }
     - { role: kubernetes-sa, tags: ['kubernetes-sa'], become: yes, become_user: k8s-admin }
     - { role: kubernetes-rbac, tags: ['kubernetes-rbac'], become: yes, become_user: k8s-admin }
+    - { role: helm-connaisseur, tags: ['helm-connaisseur'], become: yes, become_user: k8s-admin }
+    - { role: helm-mypythonapp1, tags: ['helm-mypythonapp1'], become: yes, become_user: k8s-admin }
 ...

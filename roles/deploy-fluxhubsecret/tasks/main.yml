@@ -1,0 +1,17 @@
+---
+# tasks file for deploy-fluxhubsecret
+- name: "Create {{ NAMESPACE }} namespace if doesn't exist"
+  kubernetes.core.k8s:
+    name: "{{ NAMESPACE }}"
+    api_version: v1
+    kind: Namespace
+    state: present
+
+- name: "Deploy Flux OCI secret into namespace '{{ NAMESPACE }}' from HOME/Flux/repo-auth.yaml"
+  shell: |
+    kubectl apply -f ~/Flux/repo-auth.yaml
+  register: cmd_out
+
+- debug:
+    msg: "{{ cmd_out.stdout }}"
+...

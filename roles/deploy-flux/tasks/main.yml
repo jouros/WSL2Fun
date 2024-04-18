@@ -1,0 +1,34 @@
+---
+# tasks file for deploy-flux
+- name: Set Kube k8s-admin bashrc
+  blockinfile:
+    path: "/home/k8s-admin/.bashrc"
+    block: |
+      {{ item.export }}
+    marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.name }}"
+    insertafter: EOF
+    backup: no
+  loop:
+    - { name: fluxbashcompletion, export: "command -v flux >/dev/null && . <(flux completion bash)" }
+
+- name: Extract tar.gz to remote
+  unarchive:
+    src: "flux_{{ VERSION2 }}_linux_amd64.tar.gz"
+    dest: /usr/local/bin
+
+- name: Set file permissions
+  file:
+    path: /usr/local/bin/flux
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Check Flux version
+  become: yes
+  become_user: k8s-admin
+  command: flux --version
+  register: cmd_out
+
+- debug:
+    msg: "{{ cmd_out.stdout }}"
+...
